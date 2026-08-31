@@ -12,6 +12,7 @@ import { useLocalStorage } from '../hooks/useLocalStorage';
 const CartContext = createContext(null);
 
 const STORAGE_KEY = 'techstore:cart';
+const ORDERS_KEY = 'techstore:orders';
 
 /**
  * Only `{ id, quantity }` pairs are persisted, never a copy of the product.
@@ -25,6 +26,15 @@ export function CartProvider({ children }) {
   const [isOpen, setIsOpen] = useState(false);
   const [notice, setNotice] = useState(null);
   const noticeTimer = useRef(null);
+
+  /* ---- Checkout state ----------------------------------------------- */
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [checkoutStep, setCheckoutStep] = useState('details');
+  const [customerInfo, setCustomerInfo] = useState({ name: '', email: '', phone: '' });
+  const [address, setAddress] = useState({ flat: '', street: '', city: '', state: '', pin: '', landmark: '' });
+  const [paymentMethod, setPaymentMethod] = useState('cod');
+  const [orderResult, setOrderResult] = useState(null);
+  const [orderHistory, setOrderHistory] = useLocalStorage(ORDERS_KEY, []);
 
   const flash = useCallback((message) => {
     setNotice({ message, key: Date.now() });
@@ -130,6 +140,70 @@ export function CartProvider({ children }) {
   const openCart = useCallback(() => setIsOpen(true), []);
   const closeCart = useCallback(() => setIsOpen(false), []);
 
+  /* ---- Checkout actions --------------------------------------------- */
+
+  const openCheckout = useCallback(() => {
+    setIsOpen(false);
+    setCheckoutOpen(true);
+    setCheckoutStep('details');
+    setOrderResult(null);
+  }, []);
+
+  const closeCheckout = useCallback(() => {
+    setCheckoutOpen(false);
+    setCheckoutStep('details');
+    setOrderResult(null);
+  }, []);
+
+  const goToStep = useCallback((step) => setCheckoutStep(step), []);
+
+  const resetCheckout = useCallback(() => {
+    setCheckoutOpen(false);
+    setCheckoutStep('details');
+    setOrderResult(null);
+    setCustomerInfo({ name: '', email: '', phone: '' });
+    setAddress({ flat: '', street: '', city: '', state: '', pin: '', landmark: '' });
+    setPaymentMethod('cod');
+  }, []);
+
+  const updateCustomerInfo = useCallback((fields) => {
+    setCustomerInfo((prev) => ({ ...prev, ...fields }));
+  }, []);
+
+  const updateAddress = useCallback((fields) => {
+    setAddress((prev) => ({ ...prev, ...fields }));
+  }, []);
+
+  const placeOrder = useCallback(() => {
+    const reference = `TS-${String(Date.now()).slice(-8)}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+    const orderTotal = subtotal + shipping;
+    const result = {
+      reference,
+      customerName: customerInfo.name.trim(),
+      customerEmail: customerInfo.email.trim(),
+      customerPhone: customerInfo.phone.trim(),
+      items: items.map((item) => ({
+        id: item.id,
+        name: `${item.brand} ${item.name}`,
+        image: item.image,
+        category: item.category,
+        quantity: item.quantity,
+        price: item.price,
+      })),
+      subtotal,
+      shipping,
+      total: orderTotal,
+      paymentMethod,
+      address: { ...address },
+      placedAt: new Date().toISOString(),
+    };
+    setOrderResult(result);
+    setOrderHistory((prev) => [result, ...prev]);
+    setCheckoutStep('confirmation');
+    // Clear cart after capturing order
+    setLines([]);
+  }, [customerInfo, address, paymentMethod, items, subtotal, shipping, setLines, setOrderHistory]);
+
   const value = useMemo(
     () => ({
       items,
@@ -139,6 +213,13 @@ export function CartProvider({ children }) {
       total,
       isOpen,
       notice,
+      checkoutOpen,
+      checkoutStep,
+      orderResult,
+      orderHistory,
+      customerInfo,
+      address,
+      paymentMethod,
       addItem,
       removeItem,
       increment,
@@ -148,6 +229,14 @@ export function CartProvider({ children }) {
       quantityOf,
       openCart,
       closeCart,
+      openCheckout,
+      closeCheckout,
+      goToStep,
+      resetCheckout,
+      updateCustomerInfo,
+      updateAddress,
+      placeOrder,
+      setPaymentMethod,
       flash,
       dismissNotice,
     }),
@@ -159,6 +248,13 @@ export function CartProvider({ children }) {
       total,
       isOpen,
       notice,
+      checkoutOpen,
+      checkoutStep,
+      orderResult,
+      orderHistory,
+      customerInfo,
+      address,
+      paymentMethod,
       addItem,
       removeItem,
       increment,
@@ -168,6 +264,14 @@ export function CartProvider({ children }) {
       quantityOf,
       openCart,
       closeCart,
+      openCheckout,
+      closeCheckout,
+      goToStep,
+      resetCheckout,
+      updateCustomerInfo,
+      updateAddress,
+      placeOrder,
+      setPaymentMethod,
       flash,
       dismissNotice,
     ]

@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { Icon } from './Icon';
 import { ProductImage } from './ProductImage';
 import { useOverlay } from '../hooks/useOverlay';
@@ -91,25 +90,12 @@ export function CartDrawer() {
     decrement,
     removeItem,
     clearCart,
+    openCheckout,
   } = useCart();
 
   const panelRef = useOverlay(isOpen, closeCart);
 
-  // Mock checkout: there is no payment gateway in a frontend-only project, so
-  // this confirms the order and empties the cart.
-  const [placed, setPlaced] = useState(null);
-
-  // Reopening the drawer should show the cart again, not the last receipt.
-  useEffect(() => {
-    if (isOpen) setPlaced(null);
-  }, [isOpen]);
-
   if (!isOpen) return null;
-
-  const checkout = () => {
-    setPlaced({ reference: `TS-${String(Date.now()).slice(-6)}`, total });
-    clearCart();
-  };
 
   const remaining = FREE_SHIPPING_AT - subtotal;
   const progress = Math.min(100, (subtotal / FREE_SHIPPING_AT) * 100);
@@ -153,36 +139,7 @@ export function CartDrawer() {
           </button>
         </header>
 
-        {placed ? (
-          /* ---- Order placed --------------------------------------------- */
-          <div className="anim-fade flex flex-1 flex-col items-center justify-center px-8 text-center">
-            <span className="bg-brand text-brand-ink grid size-14 place-items-center rounded-2xl">
-              <Icon name="check" size={26} strokeWidth={2.4} />
-            </span>
-            <h3 className="display text-ink mt-6 text-[21px]">Order placed</h3>
-            <p className="text-ink-2 mt-3 text-[15px] leading-relaxed">
-              Thanks — we have your order. A confirmation is on its way to your inbox.
-            </p>
-            <dl className="plate mt-6 w-full space-y-2 p-4 text-left">
-              <div className="flex items-baseline justify-between gap-4">
-                <dt className="label text-ink-3">Reference</dt>
-                <dd className="font-mono text-ink text-[12px] font-semibold">{placed.reference}</dd>
-              </div>
-              <div className="flex items-baseline justify-between gap-4">
-                <dt className="label text-ink-3">Total paid</dt>
-                <dd className="font-mono text-ink text-[12px] font-semibold">
-                  {formatPrice(placed.total)}
-                </dd>
-              </div>
-            </dl>
-            <p className="label text-ink-3 mt-5 leading-relaxed">
-              Demo checkout · no payment was taken
-            </p>
-            <button type="button" onClick={closeCart} className="btn btn-outline mt-6 w-full">
-              Keep shopping
-            </button>
-          </div>
-        ) : items.length === 0 ? (
+        {items.length === 0 ? (
           /* ---- Empty ---------------------------------------------------- */
           <div className="anim-fade flex flex-1 flex-col items-center justify-center px-8 text-center">
             <span className="bg-surface-2 text-ink-3 grid size-14 place-items-center rounded-2xl">
@@ -263,8 +220,8 @@ export function CartDrawer() {
                 </div>
               </dl>
 
-              <button type="button" onClick={checkout} className="btn btn-primary mt-4 w-full py-4 text-[14px]">
-                Proceed to checkout
+              <button type="button" onClick={openCheckout} className="btn btn-primary mt-4 w-full py-4 text-[14px]">
+                Proceed to Checkout
                 <Icon name="arrowRight" size={16} />
               </button>
 

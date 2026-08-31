@@ -6,6 +6,7 @@ import { FilterBar } from './components/FilterBar';
 import { ProductGrid } from './components/ProductGrid';
 import { ProductModal } from './components/ProductModal';
 import { CartDrawer } from './components/CartDrawer';
+import { Checkout } from './components/Checkout';
 import { Toast } from './components/Toast';
 import { Footer } from './components/Footer';
 import { SectionHead } from './components/SectionHead';
@@ -136,6 +137,7 @@ export default function App() {
       {/* Overlays live outside main so they stack above everything. */}
       <ProductModal product={viewing} onClose={closeModal} />
       <CartDrawer />
+      <Checkout />
       <Toast />
     </>
   );
