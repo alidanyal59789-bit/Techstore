@@ -7,6 +7,7 @@ import { ProductGrid } from './components/ProductGrid';
 import { ProductModal } from './components/ProductModal';
 import { CartDrawer } from './components/CartDrawer';
 import { Checkout } from './components/Checkout';
+import { MyOrders } from './components/MyOrders';
 import { Toast } from './components/Toast';
 import { Footer } from './components/Footer';
 import { SectionHead } from './components/SectionHead';
@@ -130,6 +131,8 @@ export default function App() {
             </div>
           </div>
         </section>
+
+        <MyOrders />
       </main>
 
       <Footer onCategorySelect={setCategory} />

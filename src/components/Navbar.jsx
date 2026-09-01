@@ -7,6 +7,7 @@ const LINKS = [
   { id: 'top', label: 'Home' },
   { id: 'products', label: 'Products' },
   { id: 'categories', label: 'Categories' },
+  { id: 'orders', label: 'My Orders' },
 ];
 
 /**

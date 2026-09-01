@@ -196,6 +196,7 @@ export function CartProvider({ children }) {
       paymentMethod,
       address: { ...address },
       placedAt: new Date().toISOString(),
+      status: 'Confirmed',
     };
     setOrderResult(result);
     setOrderHistory((prev) => [result, ...prev]);
